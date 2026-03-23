@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from openai import OpenAI
 
+st.set_page_config(page_title="AI", layout="centered", page_icon="🤖")
 if st.session_state.get("messages") is None:
     st.session_state.setdefault("messages", [])
 for message in st.session_state.messages:
