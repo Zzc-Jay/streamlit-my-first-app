@@ -8,7 +8,7 @@ if st.session_state.get("messages") is None:
 for message in st.session_state.messages:
     st.chat_message(message["role"]).write(message["content"])
 
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
+client = OpenAI(api_key="sk-7f6c1ef5c94140a3b636f4104cea9804", base_url="https://api.deepseek.com")
 
 prompt = st.chat_input("请输入您想问的问题")
 if prompt:
