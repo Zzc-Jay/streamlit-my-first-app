@@ -45,10 +45,8 @@ def save_session():
     st.session_state.nick_name = ""
     st.session_state.character = ""
 
-
 def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
-
 
 def load_message(file):
     # 先保存当前会话
