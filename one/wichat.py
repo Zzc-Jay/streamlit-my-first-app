@@ -17,6 +17,14 @@ if "nick_name" not in st.session_state:
 if "character" not in st.session_state:
     st.session_state.character = ""
 
+def del_message(file):
+    if os.path.exists(f"message_list/{file}.json"):
+        os.remove(f"message_list/{file}.json")
+    # 保存历史对话，重置新对话
+    st.session_state.messages = []
+    st.session_state.current_session = get_timestamp()
+    st.session_state.nick_name = ""
+    st.session_state.character = ""
 
 def save_session():
     sessino_info = {
@@ -43,7 +51,18 @@ def get_timestamp():
 
 
 def load_message(file):
-    save_session()
+    # 先保存当前会话
+    save_current = {
+        "current_session": st.session_state.current_session,
+        "nick_name": st.session_state.nick_name,
+        "character": st.session_state.character,
+        "messages": st.session_state.messages
+    }
+    # 如果有消息，先保存
+    if st.session_state.messages:
+        with open(f"message_list/{st.session_state.current_session}.json", "w", encoding="utf-8") as f:
+            json.dump(save_current, f, ensure_ascii=False, indent=4)
+    # 加载目标会话
     with open(f"message_list/{file}.json", "r", encoding="utf-8") as f:
         message = json.load(f)
     st.session_state.current_session = message["current_session"]
@@ -59,6 +78,9 @@ with st.sidebar:
     new_message = st.button("新建会话", icon="✏️", width="stretch")
     st.text("会话历史")
 
+    if "current_session" not in st.session_state:
+        st.session_state.current_session = get_timestamp()
+
     file_path = []
     if os.path.exists("message_list"):
         for file in os.listdir("message_list"):
@@ -68,19 +90,17 @@ with st.sidebar:
     for file in file_path:
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.button(file, key=f"load_{file}", width="stretch", type="primary",
+            st.button(file, key=f"load_{file}", width="stretch",
+                      type="primary" if file == st.session_state.current_session else "secondary",
                       on_click=lambda f=file: load_message(f))
-            print(file)
         with col2:
-            st.button("", key=f"del_{file}", icon="🗑️", width="stretch")
+            st.button("", key=f"del_{file}", icon="❌️", width="stretch", on_click=lambda f=file: del_message(f))
 
     nick_name = st.text_input("请输入姓名", placeholder="请输入你的昵称", value=st.session_state.nick_name)
     st.session_state.nick_name = nick_name
     character = st.text_area("请输入性格", placeholder="请输入你的性格", value=st.session_state.character)
     st.session_state.character = character
 
-    if "current_session" not in st.session_state:
-        st.session_state.current_session = get_timestamp()
     if new_message:
         save_session()
         st.rerun()
