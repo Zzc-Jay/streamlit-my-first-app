@@ -31,7 +31,7 @@ def save_session():
         with open(f"message_list/{st.session_state.current_session}.json", "w", encoding="utf-8") as f:
             json.dump(sessino_info, f, ensure_ascii=False, indent=4)
 
-    #保存历史对话，重置新对话
+    # 保存历史对话，重置新对话
     st.session_state.messages = []
     st.session_state.current_session = get_timestamp()
     st.session_state.nick_name = ""
@@ -68,7 +68,8 @@ with st.sidebar:
     for file in file_path:
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.button(file, key=f"load_{file}", width="stretch", type="primary", on_click=lambda f=file: load_message(f))
+            st.button(file, key=f"load_{file}", width="stretch", type="primary",
+                      on_click=lambda f=file: load_message(f))
             print(file)
         with col2:
             st.button("", key=f"del_{file}", icon="🗑️", width="stretch")
