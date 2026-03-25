@@ -1,10 +1,12 @@
 import json
-
-import select
 import streamlit as st
 import os
 from openai import OpenAI
 from datetime import datetime
+
+# 语音模块
+from gtts import gTTS
+import playsound
 
 # 页面布局
 st.title("三家村AI助手")
@@ -17,6 +19,7 @@ if "nick_name" not in st.session_state:
 if "character" not in st.session_state:
     st.session_state.character = ""
 
+
 def del_message(file):
     if os.path.exists(f"message_list/{file}.json"):
         os.remove(f"message_list/{file}.json")
@@ -25,6 +28,7 @@ def del_message(file):
     st.session_state.current_session = get_timestamp()
     st.session_state.nick_name = ""
     st.session_state.character = ""
+
 
 def save_session():
     sessino_info = {
@@ -45,8 +49,10 @@ def save_session():
     st.session_state.nick_name = ""
     st.session_state.character = ""
 
+
 def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
+
 
 def load_message(file):
     # 先保存当前会话
@@ -74,6 +80,7 @@ def load_message(file):
 with st.sidebar:
     st.subheader("AI基础设置")
     new_message = st.button("新建会话", icon="✏️", width="stretch")
+    st.divider()
     st.text("会话历史")
 
     if "current_session" not in st.session_state:
@@ -94,6 +101,7 @@ with st.sidebar:
         with col2:
             st.button("", key=f"del_{file}", icon="❌️", width="stretch", on_click=lambda f=file: del_message(f))
 
+    st.divider()
     nick_name = st.text_input("请输入姓名", placeholder="请输入你的昵称", value=st.session_state.nick_name)
     st.session_state.nick_name = nick_name
     character = st.text_area("请输入性格", placeholder="请输入你的性格", value=st.session_state.character)
@@ -129,7 +137,7 @@ if prompt:
                   *st.session_state.messages],
         stream=True
     )
-    # #非流式输出解析格式
+    # 非流式输出解析格式
     # response_message = response.choices[0].message.content
     # print(response_message)
     # st.chat_message("assistant").write(response_message)
@@ -142,6 +150,13 @@ if prompt:
             response_message += ms.choices[0].delta.content
             response_empty.chat_message("assistant").write(response_message)
 
+    # 返回内容转语音
+    voice_name = "temp.mp3"
+    tts = gTTS(text=response_message, lang="zh-cn", slow=False)
+    tts.save(voice_name)
+    playsound.playsound(voice_name)
+    os.remove(voice_name)
+
     st.session_state.messages.append({"role": "assistant", "content": response_message})
 
-    print(ms)
+    # print(ms)
