@@ -19,7 +19,6 @@ if "nick_name" not in st.session_state:
 if "character" not in st.session_state:
     st.session_state.character = ""
 
-
 def del_message(file):
     if os.path.exists(f"message_list/{file}.json"):
         os.remove(f"message_list/{file}.json")
