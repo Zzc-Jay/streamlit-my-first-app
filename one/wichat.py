@@ -3,21 +3,16 @@ import streamlit as st
 import os
 from openai import OpenAI
 from datetime import datetime
+import base64
 
-# 语音模块
-from gtts import gTTS
-import playsound
 
-# 页面布局
-st.title("三家村AI助手")
-st.write("这里是一个AI助手，你可以输入任何问题，AI会进行回答")
-st.set_page_config(page_title="AI", layout="centered", page_icon="🤖")
+## 语音模块
+# from gtts import gTTS
+# import playsound
 
-# 侧边栏ai消息控制
-if "nick_name" not in st.session_state:
-    st.session_state.nick_name = ""
-if "character" not in st.session_state:
-    st.session_state.character = ""
+def get_timestamp():
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
 
 def del_message(file):
     if os.path.exists(f"message_list/{file}.json"):
@@ -29,7 +24,7 @@ def del_message(file):
     st.session_state.character = ""
 
 
-def save_session():
+def save_message():
     sessino_info = {
         "current_session": st.session_state.current_session,
         "nick_name": st.session_state.nick_name,
@@ -47,10 +42,6 @@ def save_session():
     st.session_state.current_session = get_timestamp()
     st.session_state.nick_name = ""
     st.session_state.character = ""
-
-
-def get_timestamp():
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
 def load_message(file):
@@ -72,25 +63,56 @@ def load_message(file):
     st.session_state.nick_name = message["nick_name"]
     st.session_state.character = message["character"]
     st.session_state.messages = message["messages"]
-    # print(file)
 
 
+# 调用deepseek
+# client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
+
+# 调用火山大模型
+client = OpenAI(api_key=os.environ.get('ARK_API_KEY'), base_url="https://ark.cn-beijing.volces.com/api/v3")
+
+# 页面布局
+st.title("太阳之子AI助手")
+st.write("哎呦，不错哦")
+st.logo("☀️")
+st.set_page_config(page_title="太阳之子", layout="centered", page_icon="☀️")
+
+# 给session_state设置初始值，用于保存会话信息
+if "nick_name" not in st.session_state:
+    st.session_state.nick_name = ""
+if "character" not in st.session_state:
+    st.session_state.character = ""
+if "current_session" not in st.session_state:
+    st.session_state.current_session = get_timestamp()
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for message in st.session_state.messages:
+    if isinstance(message["content"], list):
+        st.chat_message(message["role"]).write(message["content"][1].get("text"))
+    else:
+        st.chat_message(message["role"]).write(message["content"])
+    # if message["role"] == "img":
+    #     st.chat_message("user").image(uploaded_file)
+    # else:
+    #     st.chat_message(message["role"]).write(message["content"])
+
+# 性格初始化
+natrue = """
+    你的名字是：%s，你需要以一个朋友的视角和我对话，尽量简洁，涉及代码相关的问题可以详细说明，你的性格是：%s
+"""
 # 侧边栏布局
 with st.sidebar:
-    st.subheader("AI基础设置")
     new_message = st.button("新建会话", icon="✏️", width="stretch")
     st.divider()
     st.text("会话历史")
 
-    if "current_session" not in st.session_state:
-        st.session_state.current_session = get_timestamp()
-
+    # 循环遍历文件夹，输出文件名
     file_path = []
     if os.path.exists("message_list"):
         for file in os.listdir("message_list"):
             if file.endswith(".json"):
                 file_path.append(file[0:-5:1])
-
     for file in file_path:
         col1, col2 = st.columns([4, 1])
         with col1:
@@ -101,45 +123,68 @@ with st.sidebar:
             st.button("", key=f"del_{file}", icon="❌️", width="stretch", on_click=lambda f=file: del_message(f))
 
     st.divider()
-    nick_name = st.text_input("请输入姓名", placeholder="请输入你的昵称", value=st.session_state.nick_name)
+    st.subheader("AI基础设置")
+    nick_name = st.text_input("AI昵称", placeholder="请输入AI昵称", value=st.session_state.nick_name)
     st.session_state.nick_name = nick_name
-    character = st.text_area("请输入性格", placeholder="请输入你的性格", value=st.session_state.character)
+    character = st.text_area("AI性格", placeholder="请输入AI性格", value=st.session_state.character)
     st.session_state.character = character
 
     if new_message:
-        save_session()
+        save_message()
         st.rerun()
 
-# 性格初始化
-natrue = """
-    你的名字是：%s，你需要以一个朋友的视角和我对话，尽量简洁，涉及代码相关的问题可以详细说明，你的性格是：%s
-"""
+# 底部固定区域
+with st._bottom:
+    uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], key="image_uploader")
+    prompt = st.chat_input(placeholder="请输入您想问的问题")
 
-# 控制chat展示元素
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-for message in st.session_state.messages:
-    st.chat_message(message["role"]).write(message["content"])
+# 构建消息
+messages = [{"role": "system",
+             "content": natrue % (st.session_state.nick_name if st.session_state.nick_name else "凡特吸",
+                                  st.session_state.character if st.session_state.character else "ai助理")}]
+temp_content = []
+# 文件管理
+if uploaded_file:
+    # 处理图片
+    image_data = uploaded_file.getvalue()
+    # st.chat_message("user").image(uploaded_file)
+    # st.session_state.messages.append({"role": "img", "content": image_data})
 
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
+    # 如果有图片，添加到消息中
+    temp_messgae = {}
+    if image_data:
+        # 上传图片
+        base64_image = base64.b64encode(image_data).decode('utf-8')
+        # 本地图片
+        # base64_image = base64.b64encode(open(image_path, "rb").read()).decode()
+        messages = messages + st.session_state.messages
+        temp_content = [
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+        ]
 
-prompt = st.chat_input("请输入您想问的问题")
+# 处理文本
 if prompt:
-    # 用户信息
     st.chat_message("user").write(f"{prompt}")
-    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    if temp_content:
+        temp_messgae = {
+            "role": "user",
+            "content": [
+                *temp_content,
+                {"type": "text", "text": prompt}
+            ]
+        }
+    else:
+        temp_messgae = {"role": "user", "content": prompt}
+
+    messages.append(temp_messgae)
+    st.session_state.messages.append(temp_messgae)
 
     response = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[{"role": "system",
-                   "content": natrue % (st.session_state.nick_name, st.session_state.character)},
-                  *st.session_state.messages],
+        model="doubao-seed-1-6-vision-250815",
+        messages=messages,
         stream=True
     )
-    # 非流式输出解析格式
-    # response_message = response.choices[0].message.content
-    # print(response_message)
-    # st.chat_message("assistant").write(response_message)
 
     # 流式输出解析格式
     response_message = ""
@@ -149,13 +194,4 @@ if prompt:
             response_message += ms.choices[0].delta.content
             response_empty.chat_message("assistant").write(response_message)
 
-    # 返回内容转语音
-    voice_name = "temp.mp3"
-    tts = gTTS(text=response_message, lang="zh-cn", slow=False)
-    tts.save(voice_name)
-    playsound.playsound(voice_name)
-    os.remove(voice_name)
-
     st.session_state.messages.append({"role": "assistant", "content": response_message})
-
-    # print(ms)
