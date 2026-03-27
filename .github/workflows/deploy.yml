@@ -19,7 +19,7 @@ jobs:
           script: |
             cd /home/ubuntu/streamlit-my-first-app
             git pull origin main
-            source venv/bin/activate
-            pip install -r requirements.txt --quiet
+            source ./one/venv/bin/activate
+            pip install -r ./one/requirements.txt --quiet
             sudo systemctl restart streamlit.service
             echo "部署完成，Streamlit 服务已重启"
