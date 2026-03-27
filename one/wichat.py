@@ -99,7 +99,6 @@ natrue = """
 """
 # 侧边栏布局
 with st.sidebar:
-
     new_message = st.button("新建会话", icon="✏️", width="stretch")
     st.divider()
     st.text("会话历史")
