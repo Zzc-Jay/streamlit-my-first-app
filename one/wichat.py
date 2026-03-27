@@ -60,6 +60,7 @@ def load_message(file):
     st.session_state.character = message["character"]
     st.session_state.messages = message["messages"]
 
+
 # 调用deepseek
 # client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
 
@@ -98,6 +99,7 @@ with st.sidebar:
     st.divider()
     st.text("会话历史")
 
+
     # 循环遍历文件夹，输出文件名
     file_path = []
     if os.path.exists("message_list"):
@@ -121,7 +123,7 @@ with st.sidebar:
     st.session_state.character = character
 
     # 音乐播放 Start-----------------------
-    b64_audio = base64.b64encode(open("sources/晴天.mp3", "rb").read()).decode()
+    b64_audio = base64.b64encode(open("one/sources/晴天.mp3", "rb").read()).decode()
 
     if "is_playing" not in st.session_state:
         st.session_state.is_playing = False
