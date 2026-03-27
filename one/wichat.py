@@ -88,10 +88,6 @@ for message in st.session_state.messages:
         st.chat_message(message["role"]).write(message["content"][1].get("text"))
     else:
         st.chat_message(message["role"]).write(message["content"])
-    # if message["role"] == "img":
-    #     st.chat_message("user").image(uploaded_file)
-    # else:
-    #     st.chat_message(message["role"]).write(message["content"])
 
 # 性格初始化
 natrue = """
