@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/ubuntu/streamlit-my-first-app/one
+            cd /home/ubuntu/streamlit-my-first-app
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt --quiet
