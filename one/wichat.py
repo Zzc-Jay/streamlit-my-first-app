@@ -122,7 +122,7 @@ with st.sidebar:
     st.session_state.character = character
 
     # 音乐播放 Start-----------------------
-    b64_audio = base64.b64encode(open("one/sources/晴天.mp3", "rb").read()).decode()
+    b64_audio = base64.b64encode(open("sources/晴天.mp3", "rb").read()).decode()
 
     if "is_playing" not in st.session_state:
         st.session_state.is_playing = False
