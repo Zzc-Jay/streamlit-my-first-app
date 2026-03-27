@@ -60,7 +60,6 @@ def load_message(file):
     st.session_state.character = message["character"]
     st.session_state.messages = message["messages"]
 
-
 # 调用deepseek
 # client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
 
@@ -169,8 +168,6 @@ temp_content = []
 if uploaded_file:
     # 处理图片
     image_data = uploaded_file.getvalue()
-    # st.chat_message("user").image(uploaded_file)
-    # st.session_state.messages.append({"role": "img", "content": image_data})
 
     # 如果有图片，添加到消息中
     temp_messgae = {}
