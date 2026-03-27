@@ -99,7 +99,6 @@ with st.sidebar:
     st.divider()
     st.text("会话历史")
 
-
     # 循环遍历文件夹，输出文件名
     file_path = []
     if os.path.exists("message_list"):
