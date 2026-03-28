@@ -95,6 +95,18 @@ natrue = """
 """
 # 侧边栏布局
 with st.sidebar:
+
+    # 音乐播放 Start-----------------------
+    b64_audio = base64.b64encode(open("sources/晴天.mp3", "rb").read()).decode()
+
+    audio_html = f"""
+    <audio autoplay="true" loop="true" controls>
+        <source src="data:audio/mp3;base64,{b64_audio}" type="audio/mpeg">
+    </audio>
+    """
+    st.markdown(audio_html, unsafe_allow_html=True)
+    # 音乐播放 End-----------------------
+
     new_message = st.button("新建会话", icon="✏️", width="stretch")
     st.divider()
     st.text("会话历史")
@@ -120,36 +132,6 @@ with st.sidebar:
     st.session_state.nick_name = nick_name
     character = st.text_area("AI性格", placeholder="请输入AI性格", value=st.session_state.character)
     st.session_state.character = character
-
-    # 音乐播放 Start-----------------------
-    b64_audio = base64.b64encode(open("sources/晴天.mp3", "rb").read()).decode()
-
-    if "is_playing" not in st.session_state:
-        st.session_state.is_playing = False
-
-    col1, col2 = st.columns([50, 1])
-    with col1:
-        if st.button("⏸️" if st.session_state.is_playing else "▶️", type="secondary", key="play_btn"):
-            st.session_state.is_playing = not st.session_state.is_playing
-            st.rerun()
-
-    audio_container = st.empty()
-
-    if st.session_state.is_playing:
-        # 自动播放 + 完全隐藏控制条
-        audio_html = f"""
-                <audio id="music_player" 
-                       autoplay="true" 
-                       loop="false"
-                       style="display: none;">
-                    <source src="data:audio/mp3;base64,{b64_audio}" type="audio/mpeg">
-                </audio>
-            """
-        audio_container.markdown(audio_html, unsafe_allow_html=True)
-    else:
-        # 暂停时什么都不显示（或显示一个空的容器）
-        audio_container.empty()
-    # 音乐播放 End-----------------------
 
     if new_message:
         save_message()
