@@ -108,7 +108,7 @@ with st.sidebar:
 
     new_message = st.button("新建会话", icon="✏️", width="stretch")
     st.divider()
-    st.text("会话历史")
+    st.subheader("会话历史")
 
     # 循环遍历文件夹，输出文件名
     file_path = []
