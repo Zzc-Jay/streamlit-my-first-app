@@ -116,6 +116,7 @@ with st.sidebar:
         for file in os.listdir("message_list"):
             if file.endswith(".json"):
                 file_path.append(file[0:-5:1])
+    file_path.sort(reverse=True)
     for file in file_path:
         col1, col2 = st.columns([4, 1])
         with col1:
