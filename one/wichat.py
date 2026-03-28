@@ -98,9 +98,8 @@ with st.sidebar:
 
     # 音乐播放 Start-----------------------
     b64_audio = base64.b64encode(open("sources/晴天.mp3", "rb").read()).decode()
-
     audio_html = f"""
-    <audio autoplay="true" loop="true" controls>
+    <audio autoplay="true" loop="true" controls style="width: 100%;">
         <source src="data:audio/mp3;base64,{b64_audio}" type="audio/mpeg">
     </audio>
     """
