@@ -5,6 +5,7 @@ from openai import OpenAI
 from datetime import datetime
 import base64
 
+IMAGE_WIDTH = 300
 
 def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -61,31 +62,30 @@ def load_message(file):
     st.session_state.character = message["character"]
     st.session_state.messages = message["messages"]
 
-@st.cache_data
-def get_message_files():
-    """缓存消息文件列表"""
-    if not os.path.exists("message_list"):
-        return []
-    files = [f[:-5] for f in os.listdir("message_list") if f.endswith(".json")]
-    return sorted(files, reverse=True)
 
+# @st.cache_data
+# def get_message_files():
+#     """缓存消息文件列表"""
+#     if not os.path.exists("message_list"):
+#         return []
+#     files = [f[:-5] for f in os.listdir("message_list") if f.endswith(".json")]
+#     return sorted(files, reverse=True)
 
-@st.cache_resource
-def get_audio_base64(file_path):
-    """缓存音频文件的 base64 编码"""
-    try:
-        with open(file_path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except FileNotFoundError:
-        st.error(f"音频文件不存在：{file_path}")
-        return None
-
+# @st.cache_resource
+# def get_audio_base64(file_path):
+#     """缓存音频文件的 base64 编码"""
+#     try:
+#         with open(file_path, "rb") as f:
+#             return base64.b64encode(f.read()).decode()
+#     except FileNotFoundError:
+#         st.error(f"音频文件不存在：{file_path}")
+#         return None
 
 # 调用deepseek
 # client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
 
 # 调用火山大模型
-MODEL_NAME= "doubao-seed-1-6-vision-250815"
+MODEL_NAME = "doubao-seed-1-6-vision-250815"
 client = OpenAI(api_key=os.environ.get('ARK_API_KEY'), base_url="https://ark.cn-beijing.volces.com/api/v3")
 
 # 页面布局
@@ -104,10 +104,23 @@ if "current_session" not in st.session_state:
     st.session_state.current_session = get_timestamp()
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
 
 for message in st.session_state.messages:
     if isinstance(message["content"], list):
-        st.chat_message(message["role"]).write(message["content"][1].get("text"))
+        # 展示图片
+        for item in message["content"]:
+            if item.get("type") == "image_url":
+                img_url = item["image_url"]["url"]
+                # 提取 base64 部分（去掉 data:image/jpeg;base64, 前缀）
+                base64_data = img_url.split(",", 1)[1]
+                # 解码为字节
+                image_bytes = base64.b64decode(base64_data)
+                # 现在 image_bytes 就等于 uploaded_file.getvalue()
+                st.chat_message(message["role"]).image(image_bytes, width=IMAGE_WIDTH)
+            elif item.get("type") == "text":
+                st.chat_message(message["role"]).write(item["text"])
     else:
         st.chat_message(message["role"]).write(message["content"])
 
@@ -118,13 +131,13 @@ nature = """
 # 侧边栏布局
 with st.sidebar:
     # 音乐播放 Start-----------------------
-    b64_audio = get_audio_base64("sources/晴天.mp3")
-    audio_html = f"""
-    <audio autoplay="true" loop="true" controls style="width: 100%;">
-        <source src="data:audio/mp3;base64,{b64_audio}" type="audio/mpeg">
-    </audio>
-    """
-    st.markdown(audio_html, unsafe_allow_html=True)
+    # b64_audio = get_audio_base64("sources/晴天.mp3")
+    # audio_html = f"""
+    # <audio autoplay="true" loop="true" controls style="width: 100%;">
+    #     <source src="data:audio/mp3;base64,{b64_audio}" type="audio/mpeg">
+    # </audio>
+    # """
+    # st.markdown(audio_html, unsafe_allow_html=True)
     # 音乐播放 End-----------------------
 
     new_message = st.button("新建会话", icon="✏️", width="stretch")
@@ -132,8 +145,11 @@ with st.sidebar:
     st.subheader("会话历史")
 
     # 循环遍历文件夹，输出文件名
-    file_path = get_message_files()
-    for file in file_path:
+    files = []
+    if os.path.exists("message_list"):
+        files = [f[:-5] for f in os.listdir("message_list") if f.endswith(".json")]
+    files.sort(reverse=True)
+    for file in files:
         col1, col2 = st.columns([4, 1])
         with col1:
             st.button(file, key=f"load_{file}", width="stretch",
@@ -162,11 +178,15 @@ with st._bottom:
 messages = [{"role": "system",
              "content": nature % (st.session_state.nick_name if st.session_state.nick_name else "凡特吸",
                                   st.session_state.character if st.session_state.character else "ai助理")}]
+
 temp_content = []
-# 文件管理
-if uploaded_file:
+# 图片管理
+if uploaded_file and not st.session_state.uploaded_file:
+    st.session_state.uploaded_file = uploaded_file
+if st.session_state.uploaded_file:
     # 处理图片
-    image_data = uploaded_file.getvalue()
+    image_data = st.session_state.uploaded_file.getvalue()
+    st.chat_message("user").image(image_data, width=IMAGE_WIDTH)
     if image_data:
         # 上传图片
         base64_image = base64.b64encode(image_data).decode('utf-8')
@@ -176,9 +196,10 @@ if uploaded_file:
         temp_content = [
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
         ]
-
+    st.session_state.uploaded_file = None
 # 处理文本
 if prompt:
+
     st.chat_message("user").write(f"{prompt}")
 
     temp_message = {
@@ -191,6 +212,9 @@ if prompt:
 
     messages.append(temp_message)
     st.session_state.messages.append(temp_message)
+
+    temp_content = []
+    st.session_state.uploaded_file = None
 
     response = client.chat.completions.create(
         model=MODEL_NAME,
