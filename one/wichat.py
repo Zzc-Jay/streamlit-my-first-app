@@ -7,6 +7,7 @@ import base64
 
 IMAGE_WIDTH = 300
 
+
 def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -21,8 +22,9 @@ def init_message():
 def del_message(file):
     if os.path.exists(f"message_list/{file}.json"):
         os.remove(f"message_list/{file}.json")
-    # 保存历史对话，重置新对话
-    init_message()
+    # 只有删除当前会话时才重置
+    if file == st.session_state.current_session:
+        init_message()
 
 
 def save_message():
@@ -63,26 +65,10 @@ def load_message(file):
     st.session_state.messages = message["messages"]
 
 
-# @st.cache_data
-# def get_message_files():
-#     """缓存消息文件列表"""
-#     if not os.path.exists("message_list"):
-#         return []
-#     files = [f[:-5] for f in os.listdir("message_list") if f.endswith(".json")]
-#     return sorted(files, reverse=True)
-
-# @st.cache_resource
-# def get_audio_base64(file_path):
-#     """缓存音频文件的 base64 编码"""
-#     try:
-#         with open(file_path, "rb") as f:
-#             return base64.b64encode(f.read()).decode()
-#     except FileNotFoundError:
-#         st.error(f"音频文件不存在：{file_path}")
-#         return None
-
 # 调用deepseek
 # client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'), base_url="https://api.deepseek.com")
+#现改为DEEPSEEK_API_KEY
+# client = OpenAI(api_key=os.environ.get('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com")
 
 # 调用火山大模型
 MODEL_NAME = "doubao-seed-1-6-vision-250815"
@@ -91,9 +77,8 @@ client = OpenAI(api_key=os.environ.get('ARK_API_KEY'), base_url="https://ark.cn-
 # 页面布局
 st.set_page_config(page_title="太阳之子", layout="centered", page_icon="☀️")
 
-st.title("太阳之子AI助手")
+st.title("☀️ 太阳之子AI助手")
 st.write("哎呦，不错哦")
-st.logo("☀️")
 
 # 给session_state设置初始值，用于保存会话信息
 if "nick_name" not in st.session_state:
@@ -106,6 +91,10 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "uploaded_file" not in st.session_state:
     st.session_state.uploaded_file = None
+if "use_voice" not in st.session_state:
+    st.session_state.use_voice = False
+if "voice_text" not in st.session_state:
+    st.session_state.voice_text = ""
 
 for message in st.session_state.messages:
     if isinstance(message["content"], list):
@@ -184,23 +173,18 @@ temp_content = []
 if uploaded_file and not st.session_state.uploaded_file:
     st.session_state.uploaded_file = uploaded_file
 if st.session_state.uploaded_file:
-    # 处理图片
     image_data = st.session_state.uploaded_file.getvalue()
     st.chat_message("user").image(image_data, width=IMAGE_WIDTH)
     if image_data:
-        # 上传图片
         base64_image = base64.b64encode(image_data).decode('utf-8')
-        # 本地图片
-        # base64_image = base64.b64encode(open(image_path, "rb").read()).decode()
-        messages = messages + st.session_state.messages
         temp_content = [
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
         ]
     st.session_state.uploaded_file = None
+
 # 处理文本
 if prompt:
-
-    st.chat_message("user").write(f"{prompt}")
+    st.chat_message("user").write(prompt)
 
     temp_message = {
         "role": "user",
@@ -210,19 +194,12 @@ if prompt:
         ] if temp_content else prompt
     }
 
+    # 始终携带完整历史消息
+    messages = messages + st.session_state.messages
     messages.append(temp_message)
     st.session_state.messages.append(temp_message)
-
-    temp_content = []
     st.session_state.uploaded_file = None
 
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=messages,
-        stream=True
-    )
-
-    # 流式输出解析格式
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
