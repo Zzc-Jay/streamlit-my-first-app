@@ -43,6 +43,11 @@ header[data-testid="stHeader"] {
     max-width: 860px !important;
 }
 
+/* ===== 2-1. 禁用浏览器 scroll anchoring，防止新消息插入时把视口拉回底部 ===== */
+* {
+    overflow-anchor: none !important;
+}
+
 /* ===== 3. 标题渐变色 ===== */
 h1 {
     background: linear-gradient(135deg, #667eea, #f5576c);
@@ -313,6 +318,18 @@ with st.sidebar:
         value=st.session_state.character,
     )
     st.session_state.character = _char
+
+    st.divider()
+
+    # —— 工具链接
+    st.subheader("🔧 实用工具")
+    st.markdown("""
+    <a href="https://zengzhichao.com/fantools" target="_blank">
+        <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-weight: 500;">
+            🔗 访问 FanTools
+        </button>
+    </a>
+    """, unsafe_allow_html=True)
 
     if _new_msg:
         save_message()
