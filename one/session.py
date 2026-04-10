@@ -102,7 +102,7 @@ def _extract_title(data, file_id):
     """提取会话标题：优先自定义标题 → 首条用户消息 → 文件 ID"""
     custom = data.get("session_title", "")
     if custom:
-        return custom[:10] + "…" if len(custom) > 10 else custom
+        return custom[:8] + "…" if len(custom) > 8 else custom
 
     for msg in data.get("messages", []):
         if msg["role"] != "user":
@@ -112,10 +112,10 @@ def _extract_title(data, file_id):
             for item in content:
                 if item.get("type") == "text":
                     t = item["text"]
-                    return t[:10] + "…" if len(t) > 10 else t
+                    return t[:8] + "…" if len(t) > 8 else t
         else:
             t = str(content)
-            return t[:10] + "…" if len(t) > 10 else t
+            return t[:8] + "…" if len(t) > 8 else t
     return file_id
 
 

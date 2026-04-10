@@ -60,6 +60,14 @@ h1 {
 /* ===== 4. 侧边栏按钮 ===== */
 section[data-testid="stSidebar"] button {
     border-radius: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+section[data-testid="stSidebar"] button p {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 /* 侧边栏折叠按钮 — 深色可见 */
 button[data-testid="stSidebarCollapseButton"],
