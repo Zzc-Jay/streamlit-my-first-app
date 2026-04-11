@@ -1,31 +1,29 @@
 # ========================================
-#  API 客户端 — 封装模型调用
+#  API 客户端 — LangChain 版本
 # ========================================
 
 import os
-from openai import OpenAI
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import BaseMessage
 from config import MODELS
 
-_clients: dict[str, OpenAI] = {}
+_llm_cache: dict[str, ChatOpenAI] = {}
 
 
-def get_client(model_key: str) -> OpenAI:
-    """按模型名获取/缓存 OpenAI 客户端"""
-    if model_key not in _clients:
+def get_llm(model_key: str) -> ChatOpenAI:
+    """按模型名获取/缓存 LangChain ChatOpenAI 实例"""
+    if model_key not in _llm_cache:
         cfg = MODELS[model_key]
-        _clients[model_key] = OpenAI(
+        _llm_cache[model_key] = ChatOpenAI(
+            model=cfg["model"],
             api_key=os.environ.get(cfg["api_key_env"]),
             base_url=cfg["base_url"],
+            streaming=True,
         )
-    return _clients[model_key]
+    return _llm_cache[model_key]
 
 
-def stream_chat(model_key: str, messages: list):
-    """流式调用模型"""
-    cfg = MODELS[model_key]
-    client = get_client(model_key)
-    return client.chat.completions.create(
-        model=cfg["model"],
-        messages=messages,
-        stream=True,
-    )
+def stream_chat(model_key: str, messages: list[BaseMessage]):
+    """流式调用 LangChain LLM，返回 AIMessageChunk 迭代器"""
+    llm = get_llm(model_key)
+    return llm.stream(messages)

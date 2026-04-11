@@ -2,6 +2,7 @@ import os
 import base64
 import streamlit as st
 from datetime import datetime
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from config import (
     IMAGE_WIDTH, MODELS, DEFAULT_MODEL, DEFAULT_NICK_NAME,
@@ -233,19 +234,28 @@ def _trigger_regenerate():
         st.session_state.regenerate = True
 
 
-def _build_api_messages():
-    """构建发给 API 的消息列表（system + 历史），剥离 timestamp 字段"""
-    system_msg = {
-        "role": "system",
-        "content": SYSTEM_PROMPT_TEMPLATE.format(
-            nick_name=st.session_state.nick_name or DEFAULT_NICK_NAME,
-            character=st.session_state.character or DEFAULT_CHARACTER,
-        ),
-    }
-    api_msgs = [system_msg]
+def _build_lc_messages():
+    """构建 LangChain 消息列表（SystemMessage + 历史），剥离 timestamp 字段"""
+    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
+        nick_name=st.session_state.nick_name or DEFAULT_NICK_NAME,
+        character=st.session_state.character or DEFAULT_CHARACTER,
+    )
+    msgs = [SystemMessage(content=system_prompt)]
     for msg in st.session_state.messages:
-        api_msgs.append({"role": msg["role"], "content": msg["content"]})
-    return api_msgs
+        content = msg["content"]
+        if msg["role"] == "user":
+            # content 可能是字符串或 list（含图片）
+            msgs.append(HumanMessage(content=content))
+        else:
+            # AIMessage 仅保留纯文本（图片内容由用户侧携带）
+            if isinstance(content, list):
+                text = " ".join(
+                    item["text"] for item in content if item.get("type") == "text"
+                )
+                msgs.append(AIMessage(content=text))
+            else:
+                msgs.append(AIMessage(content=content))
+    return msgs
 
 
 # ============================================================
@@ -392,15 +402,15 @@ elif st.session_state.regenerate:
 
 # —— 调用 API（流式输出）
 if _should_call:
-    _api_msgs = _build_api_messages()
+    _lc_msgs = _build_lc_messages()
     try:
-        _resp = stream_chat(st.session_state.selected_model, _api_msgs)
+        _resp = stream_chat(st.session_state.selected_model, _lc_msgs)
         _resp_text = ""
         _placeholder = st.empty()
 
         for _chunk in _resp:
-            _delta = _chunk.choices[0].delta.content
-            if _delta is not None:
+            _delta = _chunk.content          # LangChain AIMessageChunk.content
+            if _delta:
                 _resp_text += _delta
                 # 带闪烁光标的流式输出
                 _placeholder.chat_message("assistant", avatar=ASSISTANT_AVATAR).markdown(
