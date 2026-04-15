@@ -11,9 +11,14 @@ MODELS = {
         "api_key_env": "ARK_API_KEY",
         "base_url": "https://ark.cn-beijing.volces.com/api/v3",
     },
+    "千问 (qwen-vl-plus)": {
+        "model": "qwen-vl-plus",
+        "api_key_env": "DASHSCOPE_API_KEY",
+        "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    },
 }
 
-DEFAULT_MODEL = "豆包 (doubao-seed-vision)"
+DEFAULT_MODEL = "千问 (qwen-vl-plus)"
 
 # 系统提示词
 SYSTEM_PROMPT_TEMPLATE = (
@@ -21,8 +26,8 @@ SYSTEM_PROMPT_TEMPLATE = (
     "尽量简洁，涉及代码相关的问题可以详细说明，你的性格是：{character}"
 )
 
-DEFAULT_NICK_NAME = "凡特吸"
-DEFAULT_CHARACTER = "ai助理"
+DEFAULT_NICK_NAME = "太阳之子"
+DEFAULT_CHARACTER = "理性的编程大佬，带有一些幽默感"
 
 # 头像
 USER_AVATAR = "🥷🏻"
