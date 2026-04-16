@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ubuntu/streamlit-my-first-app
-            git pull origin main
+            git pull origin main || { echo "❌ git pull 失败，终止部署"; exit 1; }
             source ./one/venv/bin/activate
             pip install -r ./one/requirements.txt --quiet
             sudo systemctl restart streamlit.service
