@@ -18,3 +18,10 @@ __pycache__/
 # 其他常见
 *.log
 *.DS_Store
+
+# demo以及message
+demo/
+message_list/
+
+# .claude
+.claude/
