@@ -347,13 +347,6 @@ with st.sidebar:
             🔗 访问 FanTools
         </button>
     </a>
-    <div style="margin-top: 8px;">
-    <a href="https://sbti.unun.dev/" target="_blank">
-        <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #f5576c, #f093fb); color: white; border: none; font-weight: 500;">
-            🔗 访问 SBTI
-        </button>
-    </a>
-    </div>
     """, unsafe_allow_html=True)
 
     if _new_msg:
