@@ -12,8 +12,9 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Streamlit 缓存
-.streamlit/
+# Streamlit — 仅忽略密钥与缓存，保留主题配置 config.toml
+.streamlit/secrets.toml
+.streamlit/cache/
 
 # 其他常见
 *.log
