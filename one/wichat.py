@@ -136,12 +136,14 @@ section[data-testid="stSidebar"] button[kind="primary"] span {
     border-color: #667eea !important;
 }
 
-/* —— 中文化：主提示文字 */
-[data-testid="stFileUploaderDropzoneInstructions"] span {
+/* —— 中文化：主提示文字（兼容新旧 Streamlit DOM） */
+[data-testid="stFileUploaderDropzoneInstructions"] span,
+[data-testid="stFileUploadDropzoneInstructions"] span {
     font-size: 0 !important;
     display: block;
 }
-[data-testid="stFileUploaderDropzoneInstructions"] span::after {
+[data-testid="stFileUploaderDropzoneInstructions"] span::after,
+[data-testid="stFileUploadDropzoneInstructions"] span::after {
     content: "拖拽文件到此处上传";
     font-size: 0.875rem;
     display: block;
@@ -149,11 +151,13 @@ section[data-testid="stSidebar"] button[kind="primary"] span {
 }
 
 /* —— 中文化：副提示文字 */
-[data-testid="stFileUploaderDropzoneInstructions"] small {
+[data-testid="stFileUploaderDropzoneInstructions"] small,
+[data-testid="stFileUploadDropzoneInstructions"] small {
     font-size: 0 !important;
     display: block;
 }
-[data-testid="stFileUploaderDropzoneInstructions"] small::after {
+[data-testid="stFileUploaderDropzoneInstructions"] small::after,
+[data-testid="stFileUploadDropzoneInstructions"] small::after {
     content: "单文件限制 200MB • JPG / PNG / JPEG";
     font-size: 0.75rem;
     display: block;
@@ -161,12 +165,22 @@ section[data-testid="stSidebar"] button[kind="primary"] span {
     opacity: 0.6;
 }
 
-/* —— 中文化："Browse files" 按钮文字 */
-[data-testid="stFileUploaderDropzone"] button p {
+/* —— 中文化："Browse files" 按钮文字（覆盖 button 内任意文本节点） */
+[data-testid="stFileUploaderDropzone"] button p,
+[data-testid="stFileUploaderDropzone"] button div,
+[data-testid="stFileUploaderDropzone"] button span,
+[data-testid="stFileUploadDropzone"] button p,
+[data-testid="stFileUploadDropzone"] button div,
+[data-testid="stFileUploadDropzone"] button span {
     font-size: 0 !important;
     position: relative;
 }
-[data-testid="stFileUploaderDropzone"] button p::after {
+[data-testid="stFileUploaderDropzone"] button p::after,
+[data-testid="stFileUploaderDropzone"] button div::after,
+[data-testid="stFileUploaderDropzone"] button span::after,
+[data-testid="stFileUploadDropzone"] button p::after,
+[data-testid="stFileUploadDropzone"] button div::after,
+[data-testid="stFileUploadDropzone"] button span::after {
     content: "选择文件";
     font-size: 0.875rem;
 }
