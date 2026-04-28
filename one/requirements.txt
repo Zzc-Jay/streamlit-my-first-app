@@ -1,4 +1,4 @@
 openai
-streamlit
+streamlit==1.56.0
 langchain-openai
 langchain-core
