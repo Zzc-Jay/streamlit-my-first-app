@@ -136,6 +136,41 @@ section[data-testid="stSidebar"] button[kind="primary"] span {
     border-color: #667eea !important;
 }
 
+/* —— 中文化：主提示文字 */
+[data-testid="stFileUploaderDropzoneInstructions"] span {
+    font-size: 0 !important;
+    display: block;
+}
+[data-testid="stFileUploaderDropzoneInstructions"] span::after {
+    content: "拖拽文件到此处上传";
+    font-size: 0.875rem;
+    display: block;
+    text-align: center;
+}
+
+/* —— 中文化：副提示文字 */
+[data-testid="stFileUploaderDropzoneInstructions"] small {
+    font-size: 0 !important;
+    display: block;
+}
+[data-testid="stFileUploaderDropzoneInstructions"] small::after {
+    content: "单文件限制 200MB • JPG / PNG / JPEG";
+    font-size: 0.75rem;
+    display: block;
+    text-align: center;
+    opacity: 0.6;
+}
+
+/* —— 中文化："Browse files" 按钮文字 */
+[data-testid="stFileUploaderDropzone"] button p {
+    font-size: 0 !important;
+    position: relative;
+}
+[data-testid="stFileUploaderDropzone"] button p::after {
+    content: "选择文件";
+    font-size: 0.875rem;
+}
+
 /* ===== 7. 备案栏 ===== */
 .beian-footer {
     position: fixed;
@@ -244,10 +279,8 @@ def _build_lc_messages():
     for msg in st.session_state.messages:
         content = msg["content"]
         if msg["role"] == "user":
-            # content 可能是字符串或 list（含图片）
             msgs.append(HumanMessage(content=content))
         else:
-            # AIMessage 仅保留纯文本（图片内容由用户侧携带）
             if isinstance(content, list):
                 text = " ".join(
                     item["text"] for item in content if item.get("type") == "text"
@@ -409,15 +442,13 @@ if _should_call:
         _placeholder = st.empty()
 
         for _chunk in _resp:
-            _delta = _chunk.content          # LangChain AIMessageChunk.content
+            _delta = _chunk.content
             if _delta:
                 _resp_text += _delta
-                # 带闪烁光标的流式输出
                 _placeholder.chat_message("assistant", avatar=ASSISTANT_AVATAR).markdown(
                     _resp_text + " ▌"
                 )
 
-        # 最终渲染（去掉光标，加时间戳）
         _resp_ts = _now_display()
         with _placeholder.chat_message("assistant", avatar=ASSISTANT_AVATAR):
             st.write(_resp_text)
@@ -430,7 +461,6 @@ if _should_call:
         })
 
     except EnvironmentError as _e:
-        # API Key 未配置，单独提示，不写入聊天记录
         st.error(f"⚙️ 配置错误：{str(_e)}", icon="🔑")
     except Exception as _e:
         st.error(f"API 调用失败：{str(_e)}")
