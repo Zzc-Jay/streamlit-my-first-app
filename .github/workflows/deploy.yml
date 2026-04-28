@@ -20,6 +20,6 @@ jobs:
             cd /home/ubuntu/streamlit-my-first-app
             git pull origin main || { echo "❌ git pull 失败，终止部署"; exit 1; }
             source ./one/venv/bin/activate
-            pip install -r ./one/requirements.txt --upgrade --quiet
+            pip install -r ./one/requirements.txt --quiet
             sudo systemctl restart streamlit.service
             echo "部署完成，Streamlit 服务已重启"
