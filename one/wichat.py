@@ -342,18 +342,16 @@ with st.sidebar:
     # —— 工具链接
     st.subheader("🔧 实用工具")
     st.markdown("""
-    <div style="display: flex; gap: 8px;">
-        <a href="https://zengzhichao.com/fantools" target="_blank" style="flex: 1;">
-            <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-weight: 500; cursor: pointer;">
-                🔗 FanTools
-            </button>
-        </a>
-        <a href="https://zengzhichao.com/damentang" target="_blank" style="flex: 1;">
-            <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #c9b37e; border: 1.5px solid #c9b37e; font-weight: 500; cursor: pointer;">
-                🏮 大门塘
-            </button>
-        </a>
-    </div>
+    <a href="https://zengzhichao.com/fantools" target="_blank">
+        <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-weight: 500; cursor: pointer; margin-bottom: 6px;">
+            🔗 FanTools
+        </button>
+    </a>
+    <a href="https://zengzhichao.com/damentang" target="_blank">
+        <button style="width: 100%; padding: 8px; border-radius: 8px; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #c9b37e; border: 1.5px solid #c9b37e; font-weight: 500; cursor: pointer;">
+            🏮 大门塘
+        </button>
+    </a>
     """, unsafe_allow_html=True)
 
     if _new_msg:
